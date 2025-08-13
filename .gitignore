@@ -1,0 +1,14 @@
+.env
+.venv/
+venv/
+env/
+dist/
+build/
+__pycache__/
+*.spec
+*.pyc
+.DS_Store
+.idea/
+.vscode/
+.coverage
+.cache/

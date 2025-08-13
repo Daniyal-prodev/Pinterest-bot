@@ -1,0 +1,6 @@
+selenium>=4.20.0
+python-dotenv>=1.0.1
+requests>=2.32.3
+pyttsx3>=2.90
+pydantic>=2.8.2
+tenacity>=8.4.2
