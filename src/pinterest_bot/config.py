@@ -23,6 +23,8 @@ def load_config() -> Config:
     env_path = Path.cwd() / ".env"
     if env_path.exists():
         load_dotenv(dotenv_path=env_path)
+    if not os.getenv("OPENROUTER_API_KEY") and os.getenv("OPENAI_API_KEY"):
+        os.environ["OPENROUTER_API_KEY"] = os.getenv("OPENAI_API_KEY", "")
     cfg = Config()
     Path(cfg.app_state_dir).mkdir(parents=True, exist_ok=True)
     if not Path(cfg.app_state_file).exists():

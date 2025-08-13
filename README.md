@@ -22,7 +22,11 @@ Windows 10 automation tool that:
 
 1) Create a `.env` file in the repo root:
 ```
+# Prefer OPENROUTER_API_KEY; OPENAI_API_KEY is also accepted as a fallback
 OPENROUTER_API_KEY=sk-or-...
+# or:
+# OPENAI_API_KEY=sk-or-...
+
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 OPENROUTER_MODEL=openrouter/auto
 IMAGES_DIR=Z:\family
@@ -66,7 +70,7 @@ State is stored at `%APPDATA%\PinterestBot\state.json`. It tracks used image pat
 
 - Tags are comma-separated. If Pinterest’s tags input is not present, hashtags are appended at the end of the description.
 - This tool does not automate chat.openai.com; it uses the OpenRouter API.
-- The API key is loaded from `.env` and is not committed.
+- The API key is loaded from `.env` and is not committed. It prefers `OPENROUTER_API_KEY`, but will also use `OPENAI_API_KEY` if present.
 
 ## Troubleshooting
 
