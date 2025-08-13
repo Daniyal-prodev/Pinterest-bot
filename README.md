@@ -30,6 +30,8 @@ OPENROUTER_API_KEY=sk-or-...
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 OPENROUTER_MODEL=openrouter/auto
 IMAGES_DIR=Z:\family
+# Delay between pins in seconds
+RATE_LIMIT_SECONDS=8
 ```
 
 2) Install Python dependencies (optional if using the .exe):
@@ -44,7 +46,7 @@ python -m pinterest_bot
 ```
 
 - The app will speak a message asking you to type your prompt, board name, and link.
-- If Chrome is not logged in to Pinterest, log in in the opened window, then press Enter in the console to continue.
+- If Chrome is not logged in to Pinterest, the bot will wait and automatically continue once your Chrome session becomes authenticated.
 - The tool will generate content, fill the fields, click image upload, wait ~10 seconds, upload a random non-repeated image from your images folder, select the board, set the link, and publish.
 - It will then ask if you want to run again.
 
@@ -75,5 +77,16 @@ State is stored at `%APPDATA%\PinterestBot\state.json`. It tracks used image pat
 ## Troubleshooting
 
 - If selectors change on Pinterest, fields may not be found. Open an issue with details.
-- If you see login pages, complete login and press Enter in the console to continue.
+- If you see login pages, complete login in the opened Chrome window; the bot will continue automatically once authenticated.
+## Robustness improvements
+
+- Automated login detection: the bot detects Pinterest login state without requiring console input. If not logged in, it waits until the session becomes authenticated.
+- Directory changes: the bot rescans the images directory on every run and prunes missing files from state. New images are discovered automatically; no repeats until all images are used.
+- API resilience: OpenRouter calls use retries with exponential backoff and strict JSON extraction with a fallback parser. Tags are sanitized to remove special characters.
+- Cross-platform paths: Windows paths are normalized; Chrome user data directories are selected per platform. State and logs live at %APPDATA%\PinterestBot on Windows.
+- Error logging: logs are written to %APPDATA%\PinterestBot\logs.txt and also printed to console.
+- Rate limiting: set RATE_LIMIT_SECONDS in .env to control delay between pins.
+- Input validation: destination URL and board name are validated before attempting to publish.
+- Improved selectors: more resilient Pinterest element selectors and longer, staged waits for dynamic UI.
+
 - If no images are found in your folder, set `IMAGES_DIR` to the correct path in `.env`.

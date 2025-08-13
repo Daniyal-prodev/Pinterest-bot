@@ -1,7 +1,9 @@
 import os
+import time
 from contextlib import contextmanager
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 def build_chrome_options(user_data_dir: str, profile_dir: str) -> Options:
@@ -19,6 +21,11 @@ def get_driver(user_data_dir: str, profile_dir: str, timeout: int = 20):
     driver = webdriver.Chrome(options=options)
     driver.set_page_load_timeout(60)
     try:
+        try:
+            caps = driver.capabilities or {}
+            _ = caps.get("browserVersion")
+        except Exception:
+            pass
         yield driver
     finally:
         try:
@@ -26,10 +33,34 @@ def get_driver(user_data_dir: str, profile_dir: str, timeout: int = 20):
         except Exception:
             pass
 
-def ensure_logged_in(driver):
-    driver.get("https://www.pinterest.com/")
+def _is_login_page(driver) -> bool:
+    url = driver.current_url.lower()
+    if "login" in url or "auth" in url:
+        return True
     try:
-        WebDriverWait(driver, 10).until(lambda d: "pinterest.com" in d.current_url)
+        btns = driver.find_elements(By.XPATH, "//a[contains(.,'Log in')]|//button[contains(.,'Log in')]")
+        if btns:
+            return True
     except Exception:
         pass
-    input("If you are not logged in, please log in to Pinterest in the opened Chrome window. Press Enter here to continue when ready...")
+    return False
+
+def ensure_logged_in(driver, max_wait_seconds: int = 180):
+    driver.get("https://www.pinterest.com/")
+    try:
+        WebDriverWait(driver, 15).until(lambda d: "pinterest.com" in d.current_url)
+    except Exception:
+        pass
+    start = time.time()
+    while True:
+        if not _is_login_page(driver):
+            try:
+                driver.get("https://www.pinterest.com/pin-creation-tool/")
+                WebDriverWait(driver, 15).until(lambda d: "pin-creation-tool" in d.current_url or not _is_login_page(d))
+                if not _is_login_page(driver):
+                    return
+            except Exception:
+                pass
+        time.sleep(3)
+        if time.time() - start > max_wait_seconds:
+            raise RuntimeError("Pinterest login not detected within the expected time window.")
