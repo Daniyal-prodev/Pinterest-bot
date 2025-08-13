@@ -22,18 +22,20 @@ def fill_title_description_tags(driver: WebDriver, title: str, description: str,
         (By.XPATH, "//input[@aria-label='Title']"),
         (By.XPATH, "//textarea[@aria-label='Title']"),
         (By.CSS_SELECTOR, "textarea[data-test-id='PinBuilderTitleField'],input[data-test-id='PinBuilderTitleField']"),
+        (By.XPATH, "//label[contains(.,'Title')]/following::input[1]"),
     ]
     desc_locators = [
         (By.XPATH, "//textarea[contains(@aria-label,'Description')]"),
         (By.CSS_SELECTOR, "textarea[data-test-id='PinBuilderDescriptionField']"),
+        (By.XPATH, "//label[contains(.,'Description')]/following::textarea[1]"),
     ]
-    title_el = _find_any(driver, title_locators, 20)
+    title_el = _find_any(driver, title_locators, 25)
     try:
         title_el.clear()
     except Exception:
         pass
     title_el.send_keys(title)
-    desc_el = _find_any(driver, desc_locators, 20)
+    desc_el = _find_any(driver, desc_locators, 25)
     try:
         desc_el.clear()
     except Exception:
@@ -42,6 +44,7 @@ def fill_title_description_tags(driver: WebDriver, title: str, description: str,
     tags_field_locators = [
         (By.XPATH, "//input[contains(@placeholder,'Add tags')]"),
         (By.XPATH, "//input[@aria-label='Tags']"),
+        (By.CSS_SELECTOR, "input[aria-autocomplete='list']"),
     ]
     tags_input = None
     try:
@@ -58,32 +61,29 @@ def fill_title_description_tags(driver: WebDriver, title: str, description: str,
             desc_el.send_keys(hashtags)
 
 def upload_image(driver: WebDriver, image_path: str):
-    upload_button_locators = [
+    file_inputs = [
         (By.XPATH, "//input[@type='file' and contains(@accept,'image')]"),
-        (By.CSS_SELECTOR, "input[type='file']"),
+        (By.CSS_SELECTOR, "input[type='file'][accept*='image']"),
     ]
-    btn = _find_any(driver, upload_button_locators, 20)
-    try:
-        btn.click()
-    except Exception:
-        pass
+    finput = _find_any(driver, file_inputs, 30)
     time.sleep(10)
-    btn.send_keys(image_path)
-    WebDriverWait(driver, 60).until(lambda d: len(d.find_elements(By.CSS_SELECTOR, "img")) > 0)
+    finput.send_keys(image_path)
+    WebDriverWait(driver, 90).until(lambda d: len(d.find_elements(By.XPATH, "//img[contains(@src,'pinimg') or contains(@alt,'image')]")) > 0)
 
 def select_board(driver: WebDriver, board_name: str):
     open_board_locators = [
         (By.XPATH, "//div[contains(@data-test-id,'board-dropdown')]//button"),
         (By.XPATH, "//button[contains(.,'Select') or contains(.,'Board')]"),
+        (By.CSS_SELECTOR, "button[aria-controls*='board']")
     ]
-    btn = _find_any(driver, open_board_locators, 20)
+    btn = _find_any(driver, open_board_locators, 25)
     btn.click()
     item_locators = [
-        (By.XPATH, f"//div//div//div[.//div[normalize-space(text())='{board_name}']]"),
-        (By.XPATH, f"//div[@role='option' and .//*[normalize-space(text())='{board_name}']]"),
-        (By.XPATH, f"//li[.//*[normalize-space(text())='{board_name}']]"),
+        (By.XPATH, f"//div[@role='option' and .//*[normalize-space(text())=\"{board_name}\"]]"),
+        (By.XPATH, f"//li[.//*[normalize-space(text())=\"{board_name}\"]]"),
+        (By.XPATH, f"//*[@role='option'][normalize-space()=\"{board_name}\"]"),
     ]
-    item = _find_any(driver, item_locators, 20)
+    item = _find_any(driver, item_locators, 25)
     item.click()
 
 def set_link(driver: WebDriver, url: str):
@@ -104,6 +104,10 @@ def publish(driver: WebDriver):
         (By.XPATH, "//div[@role='button' and normalize-space()='Publish']"),
         (By.CSS_SELECTOR, "button[data-test-id='board-select-done'],button[type='submit']"),
     ]
-    btn = _find_any(driver, publish_locators, 20)
+    btn = _find_any(driver, publish_locators, 45)
+    try:
+        WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Publish']")))
+    except Exception:
+        pass
     btn.click()
-    WebDriverWait(driver, 60).until(lambda d: "pin-creation-tool" not in d.current_url)
+    WebDriverWait(driver, 120).until(lambda d: "pin-creation-tool" not in d.current_url)

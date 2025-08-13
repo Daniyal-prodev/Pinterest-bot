@@ -4,3 +4,4 @@ requests>=2.32.3
 pyttsx3>=2.90
 pydantic>=2.8.2
 tenacity>=8.4.2
+watchdog>=4.0.1
