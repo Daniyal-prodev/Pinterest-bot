@@ -46,10 +46,16 @@ python -m pinterest_bot
 
 ## Windows executable
 
-This repo contains a GitHub Actions workflow that builds a Windows .exe.
-- On push or PR, an artifact `PinterestBot.exe` is produced.
-- Download it from the Actions run artifacts and place it on your Windows machine.
-- Ensure `.env` exists in the same folder as the exe, or in the working directory where you run it.
+Build locally on Windows 10 using PyInstaller:
+1) Install Python 3.12 (recommend adding to PATH).
+2) In a terminal at the repo root:
+   - pip install -r requirements.txt
+   - pip install pyinstaller
+   - pyinstaller --onefile -n PinterestBot src/pinterest_bot/__main__.py
+3) The executable will be at dist/PinterestBot.exe.
+
+Runtime:
+- Place a `.env` file next to PinterestBot.exe (or run from a folder that has `.env`) with your key and IMAGES_DIR.
 - Ensure Chrome is logged in on the Default profile.
 
 ## Image reuse prevention
